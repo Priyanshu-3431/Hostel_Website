@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Book Room</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+
+<div class="booking-box">
+  <h2>🏨 Hostel Room Booking</h2>
+
+  <input id="name" placeholder="Student Name">
+  <input id="regNo" placeholder="Registration Number">
+
+  <select id="room">
+    <option value="">Select Room</option>
+    <option value="Triple Room">Triple Room</option>
+  </select>
+
+  <select id="duration">
+    <option value="">Select Duration</option>
+    <option value="3">Hostel + Mess (3 Months) - ₹13950</option>
+    <option value="6">Hostel + Mess (6 Months) - ₹26900</option>
+  </select>
+
+  <button onclick="book()">Proceed to Payment</button>
+</div>
+
+<script>
+function book(){
+  const booking = {
+    name: document.getElementById("name").value.trim(),
+    regNo: document.getElementById("regNo").value.trim(),
+    room: document.getElementById("room").value,
+    duration: document.getElementById("duration").value,
+    amount: document.getElementById("duration").value === "3" ? 13950 : 26900
+  };
+
+  if(!booking.name || !booking.regNo || !booking.room || !booking.duration){
+    alert("Please fill all booking details");
+    return;
+  }
+
+  localStorage.setItem("booking", JSON.stringify(booking));
+  window.location.href = "payment.html";
+}
+</script>
+
+</body>
+</html>

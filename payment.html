@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Payment</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+
+<div class="payment-box">
+  <h2>💳 Payment</h2>
+  <p>Scan QR & Pay</p>
+
+  <img src="gp.jpeg" width="150">
+
+  <input id="utr" placeholder="Enter UTR / Transaction ID">
+  <button onclick="pay()">Confirm Payment</button>
+</div>
+
+<script>
+function pay(){
+  const utr = document.getElementById("utr").value.trim();
+  if(!utr){
+    alert("UTR number is required");
+    return;
+  }
+
+  const booking = JSON.parse(localStorage.getItem("booking"));
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  if(!booking || !user){
+    alert("Session expired. Please login again.");
+    return;
+  }
+
+  const receipt = {
+    name: booking.name,
+    regNo: booking.regNo,
+    room: booking.room,
+    duration: booking.duration + " Months",
+    amount: booking.amount,
+    utr: utr,
+    email: user.email,
+    date: new Date().toLocaleString(),
+    status: "PAID"
+  };
+
+  let receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+  receipts.push(receipt);
+  localStorage.setItem("receipts", JSON.stringify(receipts));
+
+  // clear booking after success
+  localStorage.removeItem("booking");
+
+  window.location.href = "dashboard.html";
+}
+</script>
+
+</body>
+</html>
+

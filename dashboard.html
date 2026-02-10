@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Dashboard</title>
+<link rel="stylesheet" href="style.css">
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🏫 Hostel Dashboard</div>
+  <nav>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="booking.html">Book Room</a>
+    <a href="index.html">Logout</a>
+  </nav>
+</header>
+
+<section class="dashboard">
+
+<h2>Welcome 👋</h2>
+<p class="email" id="userEmail"></p>
+
+<div class="dash-cards">
+  <div class="dash-card">
+    <h3>🛏 Room Status</h3>
+    <p id="roomStatus">Not Booked</p>
+  </div>
+
+  <div class="dash-card">
+    <h3>💳 Payment</h3>
+    <p id="payStatus">Pending</p>
+  </div>
+
+  <div class="dash-card">
+    <h3>📅 Stay Duration</h3>
+    <p id="stayDuration">---</p>
+  </div>
+</div>
+
+<div class="summary-box">
+  <h3>🧾 Payment Receipts (Last 12)</h3>
+  <div id="receiptData"></div>
+</div>
+
+</section>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+/* current user */
+const user = JSON.parse(localStorage.getItem("currentUser"));
+if(!user){
+  location.href = "index.html";
+}
+
+/* all receipts */
+const receipts = JSON.parse(localStorage.getItem("receipts")) || [];
+
+/* user receipts → latest first → max 12 */
+const userReceipts = receipts
+  .filter(r => r.email === user.email)
+  .reverse()
+  .slice(0, 12);
+
+document.getElementById("userEmail").innerText = "Email: " + user.email;
+
+if(userReceipts.length > 0){
+
+  document.getElementById("roomStatus").innerText = "Booked";
+  document.getElementById("payStatus").innerText = "Paid";
+  document.getElementById("stayDuration").innerText =
+    userReceipts[0].duration;
+
+  let html = "";
+
+  userReceipts.forEach((r, i) => {
+    html += `
+      <div style="border:1px solid #ccc; padding:15px; margin-bottom:15px;">
+        <h4>Receipt #${i + 1}</h4>
+        <p><b>Name:</b> ${r.name}</p>
+        <p><b>Registration No:</b> ${r.regNo}</p>
+        <p><b>Room:</b> ${r.room}</p>
+        <p><b>Duration:</b> ${r.duration}</p>
+        <p><b>Amount Paid:</b> ₹${r.amount}</p>
+        <p><b>UTR:</b> ${r.utr}</p>
+        <p><b>Date:</b> ${r.date}</p>
+        <p><b>Status:</b> ✅ ${r.status}</p>
+
+        <button onclick="downloadPDF(${i})">
+          Download PDF
+        </button>
+      </div>
+    `;
+  });
+
+  document.getElementById("receiptData").innerHTML = html;
+
+}else{
+  document.getElementById("receiptData").innerHTML =
+    "<p>No receipts found for this account</p>";
+}
+
+/* PDF Download Function */
+function downloadPDF(index){
+  const r = userReceipts[index];
+  const pdf = new jsPDF();
+
+  pdf.setFontSize(18);
+  pdf.text("HOSTEL PAYMENT RECEIPT", 20, 20);
+
+  pdf.setFontSize(12);
+  pdf.text("", 20, 28);
+
+  pdf.text(`Student Name       : ${r.name}`, 20, 40);
+  pdf.text(`Registration No    : ${r.regNo}`, 20, 50);
+  pdf.text(`Email              : ${r.email}`, 20, 60);
+  pdf.text(`Room Type          : ${r.room}`, 20, 70);
+  pdf.text(`Stay Duration      : ${r.duration}`, 20, 80);
+  pdf.text(`Amount Paid        : ₹${r.amount}`, 20, 90);
+  pdf.text(`UTR / Transaction  : ${r.utr}`, 20, 100);
+  pdf.text(`Payment Date       : ${r.date}`, 20, 110);
+  pdf.text(`Payment Status     : PAID`, 20, 120);
+
+  pdf.text("------------------------------------------------", 20, 135);
+  pdf.text("Authorized Hostel Office", 20, 150);
+
+  pdf.save(`Hostel_Receipt_${index + 1}.pdf`);
+}
+</script>
+
+</body>
+</html>
+
